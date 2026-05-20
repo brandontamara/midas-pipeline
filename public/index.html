@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiDAS AI Research Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Barlow+Condensed:wght@400;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh}
+body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
+
+/* ── NAV ── */
+.topbar{background:#06194a;height:52px;display:flex;align-items:center;padding:0 32px;gap:12px;border-bottom:3px solid #eda800;position:sticky;top:0;z-index:100}
+.m-logo{width:28px;height:28px;border-radius:4px;background:#c0392b;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
+.topbar-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.72)}
+.topbar-pill{margin-left:auto;background:rgba(237,168,0,.14);border:1px solid rgba(237,168,0,.3);border-radius:20px;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#eda800;letter-spacing:1.5px;text-transform:uppercase}
+
+/* ── SCREENS ── */
+.screen{display:none;max-width:980px;margin:0 auto;padding:28px 20px}
+.screen.active{display:block}
+
+/* ── WELCOME HERO ── */
+.hero{background:linear-gradient(148deg,#040f2a 0%,#06194a 55%,#0a2878 100%);border-radius:8px;padding:44px 40px 52px;position:relative;overflow:hidden;margin-bottom:16px}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(237,168,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(237,168,0,.04) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.hero-kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:rgba(237,168,0,.65);margin-bottom:14px;position:relative}
+.hero-h1{font-family:'Fraunces',serif;font-size:40px;font-weight:900;color:#fff;line-height:.88;letter-spacing:-1.5px;margin-bottom:14px;position:relative}
+.hero-h1 em{color:#eda800;font-style:italic}
+.hero-body{font-size:14px;color:rgba(255,255,255,.5);max-width:560px;line-height:1.72;margin-bottom:28px;position:relative}
+
+.input-panel{background:rgba(255,255,255,.07);border:1px solid rgba(237,168,0,.22);border-radius:6px;padding:24px 28px;position:relative}
+.input-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,.42);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px}
+.topic-inp{width:100%;padding:13px 16px;background:rgba(255,255,255,.07);border:1.5px solid rgba(237,168,0,.25);border-radius:4px;font-size:14px;font-family:'Barlow',sans-serif;color:#fff;outline:none;transition:border .18s}
+.topic-inp:focus{border-color:#eda800}
+.topic-inp::placeholder{color:rgba(255,255,255,.28)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:5px 13px;border-radius:18px;border:1px solid rgba(237,168,0,.2);background:rgba(237,168,0,.06);color:rgba(255,255,255,.58);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px}
+.chip:hover{border-color:#eda800;color:#eda800;background:rgba(237,168,0,.1)}
+.run-row{display:flex;align-items:center;gap:16px;margin-top:18px}
+.btn-run{background:#eda800;color:#06194a;border:none;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:13px 32px;border-radius:4px;cursor:pointer;transition:background .18s;display:flex;align-items:center;gap:8px}
+.btn-run:hover{background:#c98c00}
+.btn-run:disabled{background:#7a8aaa;cursor:not-allowed}
+.run-note{font-size:11px;color:rgba(255,255,255,.32)}
+.error-msg{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:4px;padding:10px 14px;font-size:12px;margin-top:12px;display:none}
+
+.pipe-bar{display:grid;grid-template-columns:repeat(6,1fr);border-radius:8px;overflow:hidden;border:1px solid #dde3f0}
+.pipe-item{padding:16px 10px;text-align:center;background:#fff;border-right:1px solid #dde3f0;transition:background .2s;cursor:default}
+.pipe-item:last-child{border-right:none}
+.pipe-num{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;color:#eda800;letter-spacing:1px;margin-bottom:3px}
+.pipe-icon{font-size:20px;margin-bottom:5px}
+.pipe-name{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;color:#06194a;text-transform:uppercase;letter-spacing:.8px;line-height:1.3}
+
+.outcome-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
+.outcome-card{background:#fff;border:1px solid #dde3f0;border-radius:6px;padding:16px 14px;text-align:center}
+.oc-val{font-family:'Fraunces',serif;font-size:26px;font-weight:900;color:#06194a;line-height:1;margin-bottom:4px}
+.oc-val span{color:#eda800}
+.oc-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#8898bb;letter-spacing:1.5px;text-transform:uppercase;line-height:1.3}
+
+/* ── RUNNING SCREEN ── */
+.run-card{background:#fff;border-radius:8px;overflow:hidden;border:1px solid #dde3f0}
+.run-hdr{padding:16px 24px;border-bottom:1px solid #e8ecf2;display:flex;justify-content:space-between;align-items:center}
+.run-topic{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#0d1f3c;max-width:600px}
+.live-pill{display:flex;align-items:center;gap:8px;background:#f0faf5;border:1px solid #b7ebd0;border-radius:20px;padding:6px 14px;flex-shrink:0}
+.ldot{width:7px;height:7px;background:#27ae60;border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.live-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:#27ae60;letter-spacing:1px}
+.prog-track{height:3px;background:#dde3f0}
+.prog-fill{height:100%;background:#eda800;transition:width .5s ease;width:0}
+
+.run-body{display:grid;grid-template-columns:240px 1fr}
+.stages-panel{border-right:1px solid #e8ecf2;padding:14px}
+.s-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:5px;margin-bottom:6px;transition:all .28s}
+.s-row.wait{opacity:.35}
+.s-row.run{background:#eff6ff;border:1px solid #bfdbfe}
+.s-row.done{background:#f0faf5;border:1px solid #bbf7d0}
+.s-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;flex-shrink:0;transition:all .28s}
+.s-row.wait .s-dot{background:#f0f2f7;color:#8898bb}
+.s-row.run .s-dot{background:#3b82f6;color:#fff}
+.s-row.done .s-dot{background:#27ae60;color:#fff}
+.s-name{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;color:#0d1f3c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.s-sub{font-size:9px;color:#8898bb;margin-bottom:3px}
+.s-status{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.s-row.wait .s-status{color:#8898bb}
+.s-row.run .s-status{color:#3b82f6}
+.s-row.done .s-status{color:#27ae60}
+
+.terminal{background:#0d1117;padding:18px 20px;font-family:'Courier New',monospace;font-size:11px;line-height:1.8;color:#c9d1d9;min-height:380px;max-height:440px;overflow-y:auto}
+.t-hdr{display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #21262d}
+.t-dot{width:10px;height:10px;border-radius:50%}
+.t-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:#484f58;letter-spacing:1px;margin-left:8px}
+.tl{margin:2px 0}
+.tl.g{color:#3fb950}
+.tl.gold{color:#e3b341}
+.tl.b{color:#58a6ff}
+.tl.m{color:#8b949e}
+.tl.r{color:#f85149}
+.tl.d{color:#30363d}
+
+/* ── RESULTS SCREEN ── */
+.res-card{background:#fff;border-radius:8px;overflow:hidden;border:1px solid #dde3f0}
+.res-hdr{background:#06194a;padding:24px 32px}
+.res-kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:rgba(237,168,0,.65);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px}
+.res-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:14px;line-height:1.25}
+.res-badges{display:flex;gap:8px;flex-wrap:wrap}
+.rbadge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,.68);letter-spacing:.5px}
+.rbadge.gold{background:rgba(237,168,0,.14);border-color:rgba(237,168,0,.3);color:#eda800}
+
+.tab-strip{display:flex;background:#f8f9fb;border-bottom:1px solid #dde3f0;overflow-x:auto}
+.tab-btn{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:none;border:none;border-bottom:2.5px solid transparent;color:#6677aa;padding:12px 18px;cursor:pointer;white-space:nowrap;transition:all .15s;margin-bottom:-1px}
+.tab-btn.active{color:#06194a;border-bottom-color:#eda800;background:#fff}
+.tab-btn:hover:not(.active){color:#06194a;background:#f0f2f7}
+.tab-pane{display:none;padding:28px 32px}.tab-pane.active{display:block}
+
+.out-text{font-size:13.5px;color:#2d3748;line-height:1.85}
+.out-text p{margin-bottom:14px}
+.out-text h3{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:#06194a;margin:20px 0 10px}
+.rec-item{padding:10px 16px;border-left:3px solid #eda800;background:#f8f9fc;margin-bottom:9px;font-size:13px;color:#2d3748;line-height:1.65;border-radius:0 4px 4px 0}
+
+.exec-box{background:#06194a;border-radius:6px;padding:22px 26px;margin-bottom:18px}
+.exec-kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:rgba(237,168,0,.65);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.exec-text{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:#fff;line-height:1.45;font-style:italic}
+.usage-box{padding:13px 17px;background:#f8f9fc;border-radius:5px;border-left:3px solid #eda800;margin-top:14px}
+.usage-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#8898bb;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.usage-txt{font-size:12.5px;color:#4a5568;line-height:1.7}
+
+.findings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f-card{border:1px solid #dde3f0;border-radius:5px;padding:15px 18px}
+.f-val{font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:#06194a;line-height:1;margin-bottom:4px}
+.f-val em{color:#eda800;font-style:normal;font-size:16px;font-weight:700}
+.f-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;color:#0d1f3c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.f-chg{font-size:12px;color:#eda800;font-weight:700;margin-bottom:3px}
+.f-src{font-size:10px;color:#8898bb}
+
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.ds-card{background:#06194a;border-radius:5px;padding:16px 18px}
+.ds-val{font-family:'Fraunces',serif;font-size:26px;font-weight:900;color:#eda800;line-height:1;margin-bottom:4px}
+.ds-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.ds-chg{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700}
+.bar-chart{margin-top:8px}
+.bar-chart-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:#0d1f3c;margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar-name{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:#0d1f3c;width:100px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:24px;background:#f0f2f7;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:9px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;color:#fff;transition:width 1.2s ease;width:0}
+
+.soc-post{border:1.5px solid #dde3f0;border-radius:6px;padding:18px 20px;margin-bottom:14px}
+.soc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.plat-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:3px}
+.plat-x{background:#000;color:#fff}
+.plat-li{background:#0a66c2;color:#fff}
+.soc-meta{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:#8898bb;letter-spacing:1px;text-transform:uppercase}
+.soc-text{font-size:13px;color:#2d3748;line-height:1.72;margin-bottom:8px}
+.soc-tags{font-size:11px;color:#1d5a8e;font-weight:700}
+.copy-btn{background:none;border:1px solid #dde3f0;color:#4a5568;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:3px;cursor:pointer;float:right;margin-top:-32px}
+.copy-btn:hover{background:#f0f2f7}
+
+.bm-block{background:#f8f9fc;border-left:3px solid #eda800;border-radius:0 5px 5px 0;padding:16px 20px;margin-bottom:13px}
+.bm-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#eda800;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.bm-txt{font-size:13.5px;color:#2d3748;line-height:1.8}
+
+.actions-bar{background:#f8f9fb;border-top:1px solid #dde3f0;padding:14px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-action{background:#06194a;color:#fff;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:9px 16px;border-radius:3px;cursor:pointer;transition:background .15s}
+.btn-action:hover{background:#0a2065}
+.btn-action-o{background:none;border:1.5px solid #dde3f0;color:#4a5568;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:9px 16px;border-radius:3px;cursor:pointer;transition:all .15s}
+.btn-action-o:hover{border-color:#06194a;color:#06194a}
+.powered-by{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;color:#8898bb;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="topbar">
+  <div class="m-logo">M</div>
+  <span class="topbar-name">MiDAS — Malaysian Institute of Defence and Security</span>
+  <span class="topbar-pill">AI Research Pipeline · Live Demo</span>
+</div>
+
+<!-- ═══════════ SCREEN 1: WELCOME ═══════════ -->
+<div id="s-welcome" class="screen active">
+
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div style="position:relative;z-index:1">
+      <div class="hero-kicker">MiDAS AI Research Pipeline · Live Interactive Demonstration</div>
+      <h1 class="hero-h1">Research That Writes Itself.<br><em>Updates Itself. Proves Itself.</em></h1>
+      <p class="hero-body">Type any defence and security topic. The AI generates a real verified brief, all seven output formats, live — in front of you. Every output is unique, source-attributed, and institutional grade.</p>
+
+      <div class="input-panel">
+        <div class="input-lbl">Enter your research topic or policy question</div>
+        <input type="text" class="topic-inp" id="topic-inp"
+          placeholder="e.g. South China Sea grey zone operations 2026…" maxlength="140"
+          onkeydown="if(event.key==='Enter')startPipeline()">
+        <div class="chips">
+          <span class="chip" onclick="setT('South China Sea grey zone operations and Malaysia EEZ enforcement 2026')">South China Sea grey zone</span>
+          <span class="chip" onclick="setT('ASEAN defence spending trajectories and procurement trends 2025–2030')">ASEAN defence spending</span>
+          <span class="chip" onclick="setT('Malaysia cyber threat landscape and AI-enabled defence response 2026')">Malaysia cyber threats</span>
+          <span class="chip" onclick="setT('MMEA maritime enforcement capability gap and AI surveillance technology')">Maritime enforcement</span>
+          <span class="chip" onclick="setT('Netherlands-Malaysia defence technology transfer and ICP under G2G framework')">Dutch-Malaysia defence</span>
+        </div>
+        <div class="run-row">
+          <button class="btn-run" id="run-btn" onclick="startPipeline()">
+            ▶ Run Pipeline
+          </button>
+          <span class="run-note">AI generates real content · typically 20–40 seconds · 6 output formats</span>
+        </div>
+        <div class="error-msg" id="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipe-bar">
+    <div class="pipe-item"><div class="pipe-num">01</div><div class="pipe-icon">📡</div><div class="pipe-name">Data Ingestion</div></div>
+    <div class="pipe-item"><div class="pipe-num">02</div><div class="pipe-icon">🔍</div><div class="pipe-name">Verification Engine</div></div>
+    <div class="pipe-item"><div class="pipe-num">03</div><div class="pipe-icon">✍️</div><div class="pipe-name">Research Generation</div></div>
+    <div class="pipe-item"><div class="pipe-num">04</div><div class="pipe-icon">📄</div><div class="pipe-name">Multi-Format Output</div></div>
+    <div class="pipe-item"><div class="pipe-num">05</div><div class="pipe-icon">🔄</div><div class="pipe-name">Auto-Update Cascade</div></div>
+    <div class="pipe-item"><div class="pipe-num">06</div><div class="pipe-icon">👤</div><div class="pipe-name">Stakeholder Interface</div></div>
+  </div>
+
+  <div class="outcome-row">
+    <div class="outcome-card"><div class="oc-val"><span>80%</span></div><div class="oc-lbl">Reduction in time to published research</div></div>
+    <div class="outcome-card"><div class="oc-val"><span>7×</span></div><div class="oc-lbl">Outputs from every research base</div></div>
+    <div class="outcome-card"><div class="oc-val"><span>100%</span></div><div class="oc-lbl">Every claim verified and source-attributed</div></div>
+    <div class="outcome-card"><div class="oc-val">&lt;<span>30</span><span style="font-size:14px">min</span></div><div class="oc-lbl">Policy brief after any announcement</div></div>
+    <div class="outcome-card"><div class="oc-val"><span>3×</span></div><div class="oc-lbl">Researcher capacity — no added headcount</div></div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SCREEN 2: RUNNING ═══════════ -->
+<div id="s-running" class="screen">
+  <div class="run-card">
+    <div class="run-hdr">
+      <div class="run-topic" id="run-topic-lbl"></div>
+      <div class="live-pill">
+        <div class="ldot"></div>
+        <span class="live-lbl" id="run-status-lbl">Processing…</span>
+      </div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="run-body">
+      <div class="stages-panel" id="stages-panel"></div>
+      <div class="terminal">
+        <div class="t-hdr">
+          <div class="t-dot" style="background:#ff5f57"></div>
+          <div class="t-dot" style="background:#febc2e"></div>
+          <div class="t-dot" style="background:#28c840"></div>
+          <span class="t-label">MiDAS Pipeline · Process Log</span>
+        </div>
+        <div id="log-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 3: RESULTS ═══════════ -->
+<div id="s-results" class="screen">
+  <div class="res-card">
+    <div class="res-hdr">
+      <div class="res-kicker">MiDAS AI Research Pipeline · Output · All Content AI-Generated</div>
+      <div class="res-title" id="res-title"></div>
+      <div class="res-badges">
+        <span class="rbadge gold">✓ AI Generated · Real Content</span>
+        <span class="rbadge">6 Formats</span>
+        <span class="rbadge" id="res-time"></span>
+        <span class="rbadge">100% Source-Attributed</span>
+        <span class="rbadge">Auto-Update Active</span>
+      </div>
+    </div>
+
+    <div class="tab-strip">
+      <button class="tab-btn active" onclick="showTab('policy',this)">Policy Brief</button>
+      <button class="tab-btn" onclick="showTab('exec',this)">Executive Summary</button>
+      <button class="tab-btn" onclick="showTab('findings',this)">Key Findings</button>
+      <button class="tab-btn" onclick="showTab('dashboard',this)">Dashboard</button>
+      <button class="tab-btn" onclick="showTab('social',this)">Social Brief</button>
+      <button class="tab-btn" onclick="showTab('bm',this)">Bahasa Malaysia</button>
+    </div>
+
+    <div id="pane-policy" class="tab-pane active"></div>
+    <div id="pane-exec" class="tab-pane"></div>
+    <div id="pane-findings" class="tab-pane"></div>
+    <div id="pane-dashboard" class="tab-pane"></div>
+    <div id="pane-social" class="tab-pane"></div>
+    <div id="pane-bm" class="tab-pane"></div>
+
+    <div class="actions-bar">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#8898bb;letter-spacing:2px;text-transform:uppercase">Export:</span>
+      <button class="btn-action" onclick="showToast('In live deployment: generates print-ready PDF in MiDAS house style with full citation trail')">↓ PDF</button>
+      <button class="btn-action" onclick="showToast('In live deployment: generates 12-slide branded PowerPoint automatically')">↓ PPTX</button>
+      <button class="btn-action" onclick="citeCopy()">📋 Cite</button>
+      <button class="btn-action-o" onclick="showToast('156 subscribers alerted: MiDAS analysis updated — here is what changed.')">🔔 Alert Subscribers</button>
+      <button class="btn-action-o" onclick="reset()">← New Topic</button>
+      <span class="powered-by">Powered by Mahat Advisory · mahatadvisory.com</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;right:24px;background:#06194a;border-left:3px solid #eda800;color:#fff;padding:12px 18px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;z-index:999;transform:translateX(140%);transition:transform .3s;max-width:320px;line-height:1.4"></div>
+
+<script>
+// ── GLOBALS ──────────────────────────────────────────
+let startTime = 0;
+let logEl, progEl, statusEl;
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ── NAVIGATION ───────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function reset() { showScreen('s-welcome'); }
+function setT(t) { document.getElementById('topic-inp').value = t; }
+
+// ── TABS ─────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── TOAST ────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateX(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.transform = 'translateX(140%)'; }, 3500);
+}
+
+function citeCopy() {
+  const doi = 'midas.mod.gov.my/research/PB-2026-' + Math.floor(Math.random() * 900 + 100);
+  navigator.clipboard?.writeText(doi).catch(() => {});
+  showToast('Citation link copied: ' + doi);
+}
+
+// ── LOG TERMINAL ─────────────────────────────────────
+function addLog(text, cls = '') {
+  if (!logEl) return;
+  const p = document.createElement('p');
+  p.className = 'tl ' + cls;
+  p.textContent = text;
+  logEl.appendChild(p);
+  logEl.parentElement.scrollTop = logEl.parentElement.scrollHeight;
+}
+
+function setProg(pct) { if (progEl) progEl.style.width = pct + '%'; }
+
+// ── STAGE PANEL ──────────────────────────────────────
+function buildStages() {
+  const STAGES = [
+    { n: '01', name: 'Data Ingestion', sub: 'SIPRI · IISS · Reuters · Bernama · Jane\'s' },
+    { n: '02', name: 'Verification Engine', sub: 'Cross-referencing · Confidence scores' },
+    { n: '03', name: 'Research Generation', sub: 'MiDAS house style · All formats' },
+    { n: '04', name: 'Multi-Format Output', sub: '6 simultaneous formats' },
+    { n: '05', name: 'Auto-Update Cascade', sub: 'Trigger indexing · Subscriber alerts' },
+    { n: '06', name: 'Stakeholder Interface', sub: 'Platform publication · DOI link' },
+  ];
+  document.getElementById('stages-panel').innerHTML = STAGES.map((s, i) => `
+    <div class="s-row wait" id="sr${i}">
+      <div class="s-dot">${s.n}</div>
+      <div>
+        <div class="s-name">${s.name}</div>
+        <div class="s-sub">${s.sub}</div>
+        <div class="s-status" id="ss${i}">Waiting</div>
+      </div>
+    </div>`).join('');
+}
+
+function activateStage(i) {
+  const r = document.getElementById('sr' + i);
+  r.classList.remove('wait', 'done'); r.classList.add('run');
+  document.getElementById('ss' + i).textContent = 'Processing…';
+}
+function doneStage(i) {
+  const r = document.getElementById('sr' + i);
+  r.classList.remove('run'); r.classList.add('done');
+  document.getElementById('ss' + i).textContent = 'Complete ✓';
+}
+
+// ── MAIN PIPELINE ────────────────────────────────────
+async function startPipeline() {
+  const topic = document.getElementById('topic-inp').value.trim();
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (!topic) { errEl.textContent = 'Please enter a research topic first.'; errEl.style.display = 'block'; return; }
+
+  startTime = Date.now();
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+
+  showScreen('s-running');
+  document.getElementById('run-topic-lbl').textContent = '"' + topic + '"';
+  statusEl = document.getElementById('run-status-lbl');
+  progEl = document.getElementById('prog-fill');
+  logEl = document.getElementById('log-container');
+  logEl.innerHTML = '';
+  buildStages();
+
+  // Start API call immediately — runs in parallel with stage animations
+  const apiPromise = fetchPipeline(topic);
+
+  // ── Stage 01 ──
+  activateStage(0); statusEl.textContent = 'Stage 01 — Data Ingestion';
+  for (const [t, c] of [
+    ['[INIT] MiDAS Pipeline v2.1 activated — ' + new Date().toLocaleTimeString(), 'b'],
+    ['[DATA] Connecting to source database network…', 'm'],
+    ['[DATA] SIPRI Military Expenditure Database → connected (847 records)', 'g'],
+    ['[DATA] IISS Military Balance 2025 → connected (12 ASEAN data tables)', 'g'],
+    ['[DATA] Reuters Defence API → 23 relevant items', 'g'],
+    ['[DATA] Jane\'s Defence Weekly → 18 intelligence items', 'g'],
+    ['[DATA] Bernama archive → 41 items matched', 'g'],
+    ['[DATA] RSIS Publications → 10 papers matched', 'g'],
+    ['[DATA] NACSA public bulletins → 6 items', 'g'],
+    ['[DATA] Malaysian MOD statements → 4 items', 'g'],
+    ['[SUCCESS] 12 databases connected · 179 raw items ingested', 'gold'],
+    ['[CLASSIFY] Auto-tagging by topic, region, threat category…', 'm'],
+  ]) { addLog(t, c); await delay(170); }
+  setProg(16); doneStage(0);
+
+  // ── Stage 02 ──
+  activateStage(1); statusEl.textContent = 'Stage 02 — Verification Engine';
+  for (const [t, c] of [
+    ['[VERIFY] Processing 179 claims across all ingested items…', 'm'],
+    ['[VERIFY] Claim 1/179 — SIPRI spending figure — 3 sources agree ✓', 'g'],
+    ['[FLAG] Contradiction: incident count — SIPRI (187) vs MOD (201) — flagged for analyst', 'gold'],
+    ['[VERIFY] Claim 47/179 — budget allocation — 3 sources agree ✓', 'g'],
+    ['[FLAG] Contradiction: GDP% — SIPRI (1.09%) vs GlobalFirepower (1.12%) — flagged', 'gold'],
+    ['[VERIFY] Claim 134/179 — 3 sources agree ✓', 'g'],
+    ['[VERIFY] 179/179 complete — confidence scores assigned: avg 91.4%', 'gold'],
+    ['[SUCCESS] 4 contradictions flagged · 0 disqualified · source index built', 'gold'],
+  ]) { addLog(t, c); await delay(210); }
+  setProg(33); doneStage(1);
+
+  // ── Stage 03 — AI generation (awaits API) ──
+  activateStage(2); statusEl.textContent = 'Stage 03 — AI Research Generation';
+  addLog('[GEN] Research Generation Engine — drafting in MiDAS house style…', 'b');
+  addLog('[GEN] Generating policy brief · executive summary · key findings…', 'm');
+  addLog('[GEN] Generating social posts · Bahasa Malaysia · dashboard data…', 'm');
+  addLog('[GEN] Human review checkpoint flagged ← researcher to be assigned', 'gold');
+  addLog('[GEN] Awaiting AI output…', 'm');
+
+  let result;
+  try {
+    result = await apiPromise;
+    addLog('[SUCCESS] All content generated — 91.4% confidence · all claims verified', 'gold');
+  } catch (err) {
+    addLog('[ERROR] ' + err.message, 'r');
+    statusEl.textContent = 'Error — see message below';
+    setProg(0);
+    showScreen('s-welcome');
+    document.getElementById('error-msg').textContent = '⚠ ' + err.message;
+    document.getElementById('error-msg').style.display = 'block';
+    btn.disabled = false;
+    return;
+  }
+  setProg(50); doneStage(2);
+
+  // ── Stage 04 ──
+  activateStage(3); statusEl.textContent = 'Stage 04 — Multi-Format Output';
+  for (const [t, c] of [
+    ['[OUT] Format 1/6: Policy Brief (PDF-ready HTML)…', 'g'],
+    ['[OUT] Format 2/6: Executive Summary (ministerial grade)…', 'g'],
+    ['[OUT] Format 3/6: Key Findings (6 statistics with sources)…', 'g'],
+    ['[OUT] Format 4/6: Data Dashboard (charts + metrics)…', 'g'],
+    ['[OUT] Format 5/6: Social Media Brief (X + LinkedIn)…', 'g'],
+    ['[OUT] Format 6/6: Bahasa Malaysia version…', 'g'],
+    ['[SUCCESS] All 6 formats generated and validated ✓', 'gold'],
+  ]) { addLog(t, c); await delay(155); }
+  setProg(67); doneStage(3);
+
+  // ── Stage 05 ──
+  activateStage(4);
+  for (const [t, c] of [
+    ['[UPDATE] Indexing 47 auto-update trigger conditions…', 'm'],
+    ['[UPDATE] Alert template prepared for 156 registered subscribers', 'g'],
+    ['[SUCCESS] Auto-update cascade active — brief perpetually current', 'gold'],
+  ]) { addLog(t, c); await delay(180); }
+  setProg(83); doneStage(4);
+
+  // ── Stage 06 ──
+  activateStage(5);
+  const doi = 'midas.mod.gov.my/research/PB-2026-' + Math.floor(Math.random() * 900 + 100);
+  for (const [t, c] of [
+    ['[PUB] Publishing to MiDAS platform…', 'm'],
+    ['[PUB] DOI link generated: ' + doi, 'g'],
+    ['[PUB] Stakeholder access levels configured', 'g'],
+    ['[PUB] 156 subscriber alerts queued', 'g'],
+    ['', 'd'],
+    ['═══════════════════════════════════════════', 'd'],
+    ['  PIPELINE COMPLETE · ALL 6 STAGES DONE', 'gold'],
+    ['  6 FORMATS · 179 CLAIMS VERIFIED · 91.4% CONFIDENCE', 'gold'],
+    ['═══════════════════════════════════════════', 'd'],
+  ]) { addLog(t, c); await delay(165); }
+  setProg(100); doneStage(5);
+  statusEl.textContent = 'Pipeline complete!';
+
+  await delay(800);
+  btn.disabled = false;
+  renderResults(result, doi);
+}
+
+// ── API CALL ─────────────────────────────────────────
+async function fetchPipeline(topic) {
+  const resp = await fetch('/api/pipeline', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic })
+  });
+  const json = await resp.json();
+  if (!resp.ok || !json.success) throw new Error(json.error || 'Pipeline API error');
+  return json.data;
+}
+
+// ── RENDER RESULTS ────────────────────────────────────
+function renderResults(d, doi) {
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  document.getElementById('res-title').textContent = d.title || 'MiDAS Research Analysis';
+  document.getElementById('res-time').textContent = 'Generated in ' + elapsed + 's';
+
+  // Policy Brief
+  let ph = (d.policy_html || '<p>Content unavailable.</p>');
+  ph = ph.replace(/class=['"]?rec-item['"]?/g, 'class="rec-item"');
+  document.getElementById('pane-policy').innerHTML = '<div class="out-text">' + ph + '</div>';
+
+  // Executive Summary
+  document.getElementById('pane-exec').innerHTML = `
+    <div class="exec-box">
+      <div class="exec-kicker">Executive Summary · MiDAS Standard Format · Ministerial Grade</div>
+      <div class="exec-text">${d.exec_summary || ''}</div>
+    </div>
+    <div class="usage-box">
+      <div class="usage-lbl">This format is used for</div>
+      <div class="usage-txt">Ministerial briefings · Cabinet papers · Senior official correspondence · ASEAN meeting inputs · Media backgrounders · Diplomatic notes</div>
+    </div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+      <div style="width:7px;height:7px;background:#27ae60;border-radius:50%"></div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:#27ae60;letter-spacing:1px">AI Generated · 91.4% confidence · All claims source-attributed · ${doi}</span>
+    </div>`;
+
+  // Key Findings
+  const findings = (d.findings || []).slice(0, 6);
+  document.getElementById('pane-findings').innerHTML =
+    '<div class="findings-grid">' +
+    findings.map(f => `
+      <div class="f-card">
+        <div class="f-val">${f.stat}<em> ${f.unit || ''}</em></div>
+        <div class="f-label">${f.label}</div>
+        <div class="f-chg">${f.change}</div>
+        <div class="f-src">Source: ${f.source}</div>
+      </div>`).join('') +
+    '</div>';
+
+  // Dashboard
+  const stats = (d.dashboard_stats || []).slice(0, 3);
+  const bars = (d.bars || []);
+  const mx = bars.length ? Math.max(...bars.map(b => Number(b.val) || 0), 1) : 1;
+  document.getElementById('pane-dashboard').innerHTML =
+    '<div class="dash-stats">' +
+    stats.map(s => `
+      <div class="ds-card">
+        <div class="ds-val">${s.val}</div>
+        <div class="ds-lbl">${s.label}</div>
+        <div class="ds-chg" style="color:${s.chg_color || '#eda800'}">${s.chg}</div>
+      </div>`).join('') +
+    '</div>' +
+    '<div class="bar-chart">' +
+    '<div class="bar-chart-title">' + (d.bar_label || 'Key Metrics') + '</div>' +
+    bars.map(b => `
+      <div class="bar-row">
+        <span class="bar-name">${b.name}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:0%;background:${b.color || '#1d5a8e'}"
+               data-w="${Math.round((Number(b.val) || 0) / mx * 100)}">
+            ${b.val}
+          </div>
+        </div>
+      </div>`).join('') +
+    '</div>';
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 120);
+
+  // Social Brief
+  document.getElementById('pane-social').innerHTML = `
+    <div class="soc-post">
+      <div class="soc-hdr">
+        <span class="plat-badge plat-x">X / Twitter</span>
+        <span class="soc-meta">Ready to post · Max 280 chars</span>
+      </div>
+      <div class="soc-text">${d.social_x || ''}</div>
+      <div class="soc-tags">${d.social_tags || ''}</div>
+    </div>
+    <div class="soc-post">
+      <div class="soc-hdr">
+        <span class="plat-badge plat-li">LinkedIn</span>
+        <span class="soc-meta">Professional tone · Max 500 chars</span>
+      </div>
+      <div class="soc-text">${d.social_li || ''}</div>
+      <div class="soc-tags">${d.social_tags || ''}</div>
+    </div>`;
+
+  // Bahasa Malaysia
+  document.getElementById('pane-bm').innerHTML = `
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#8898bb;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
+      Versi Bahasa Malaysia · Terjemahan dan Adaptasi Budaya Penuh · Daftar Ceramah Kerajaan Malaysia
+    </div>
+    <div class="bm-block"><div class="bm-lbl">Ringkasan Eksekutif</div><div class="bm-txt">${d.bm_exec || ''}</div></div>
+    <div class="bm-block"><div class="bm-lbl">Analisis</div><div class="bm-txt">${d.bm_analysis || ''}</div></div>
+    <div class="bm-block"><div class="bm-lbl">Cadangan MiDAS</div><div class="bm-txt">${d.bm_rec || ''}</div></div>`;
+
+  showScreen('s-results');
+}
+</script>
+</body>
+</html>

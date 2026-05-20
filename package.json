@@ -1,0 +1,17 @@
+{
+  "name": "midas-pipeline-demo",
+  "version": "1.0.0",
+  "description": "MiDAS AI Research Pipeline — Interactive Live Demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@anthropic-ai/sdk": "^0.27.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
