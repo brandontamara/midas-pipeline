@@ -128,6 +128,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const PORT = process.env.PORT || 8080;
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅  MiDAS Pipeline Demo running at http://localhost:${PORT}`);
   console.log(`    API key: ${process.env.ANTHROPIC_API_KEY ? '✓ Set' : '✗ NOT SET — add ANTHROPIC_API_KEY'}\n`);
