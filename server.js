@@ -1,5 +1,7 @@
+require('dotenv').config();
+
 const express = require('express');
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path = require('path');
 
 const app = express();
@@ -10,7 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Health check ──────────────────────────────────────────────────
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', hasKey: !!process.env.ANTHROPIC_API_KEY });
+  res.json({ status: 'ok', hasKey: !!process.env.GEMINI_API_KEY });
 });
 
 // ── Pipeline API endpoint ─────────────────────────────────────────
@@ -21,14 +23,14 @@ app.post('/api/pipeline', async (req, res) => {
     return res.status(400).json({ error: 'Please provide a research topic.' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
     return res.status(500).json({
-      error: 'ANTHROPIC_API_KEY is not set. Add it as an environment variable.'
+      error: 'GEMINI_API_KEY is not set. Add it as an environment variable.'
     });
   }
 
-  const client = new Anthropic({ apiKey });
+const genAI = new GoogleGenerativeAI(apiKey);
 
   const SYSTEM = `You are the MiDAS AI Research Pipeline — the AI intelligence engine of the Malaysian Institute of Defence and Security (MiDAS). Your role is to generate authoritative, institutional-grade research outputs on defence and security topics relevant to Malaysia and the ASEAN region.
 
@@ -80,47 +82,74 @@ REQUIREMENTS:
 - Policy brief must contain genuine analytical insight, not generic observations
 - Bahasa Malaysia sections must read as written by a Malaysian government official, not translated`;
 
-  try {
-    const message = await client.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 4000,
-      system: SYSTEM,
-      messages: [
+try {
+  const model = genAI.getGenerativeModel({
+  model: 'gemini-2.5-flash',
+  generationConfig: {
+  responseMimeType: 'application/json',
+  temperature: 0.2,
+  maxOutputTokens: 8192
+}
+});
+
+  const result = await model.generateContent({
+  contents: [
+    {
+      role: 'user',
+      parts: [
         {
-          role: 'user',
-          content: `Generate a comprehensive MiDAS AI Research Pipeline output for this topic: ${topic.trim()}`
+          text: `${SYSTEM}
+
+Generate a comprehensive MiDAS AI Research Pipeline output for this topic:
+${topic.trim()}`
         }
       ]
-    });
-
-    const rawText = message.content.find(b => b.type === 'text')?.text || '';
-    const cleaned = rawText
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
-      .trim();
-
-    let parsed;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch (parseError) {
-      console.error('JSON parse failed:', parseError.message);
-      console.error('Raw text (first 500):', rawText.substring(0, 500));
-      return res.status(500).json({ error: 'AI returned malformed JSON. Try again.' });
     }
+  ]
+});
 
-    res.json({ success: true, data: parsed });
+ const rawText = result.response.text();
 
-  } catch (err) {
-    console.error('Anthropic API error:', err.message);
-    res.status(500).json({
-      error: err.status === 401
-        ? 'Invalid API key. Check your ANTHROPIC_API_KEY environment variable.'
-        : err.status === 429
-        ? 'Rate limit hit. Wait a moment and try again.'
-        : `API error: ${err.message}`
-    });
-  }
+console.log('\nRAW GEMINI RESPONSE:\n');
+console.log(rawText);
+
+const cleaned = rawText
+  .replace(/```json/g, '')
+  .replace(/```/g, '')
+  .trim();
+
+let parsed;
+
+try {
+  parsed = JSON.parse(cleaned);
+
+  console.log('\nJSON PARSED SUCCESSFULLY\n');
+
+} catch (parseError) {
+
+  console.error('\nJSON PARSE ERROR:\n', parseError);
+
+  return res.status(500).json({
+    error: 'Gemini returned invalid JSON.',
+    raw: rawText
+  });
+}
+
+res.json({
+  success: true,
+  data: parsed
+});
+
+} catch (err) {
+
+console.error('Gemini API error:', err);
+
+res.status(500).json({
+  error: err.message
+});
+
+}
+
 });
 
 // ── Serve frontend for all other routes ───────────────────────────
@@ -128,9 +157,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 8080;
-
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅  MiDAS Pipeline Demo running at http://localhost:${PORT}`);
-  console.log(`    API key: ${process.env.ANTHROPIC_API_KEY ? '✓ Set' : '✗ NOT SET — add ANTHROPIC_API_KEY'}\n`);
+  console.log(`API key: ${process.env.GEMINI_API_KEY ? '✓ Set' : '✗ NOT SET'}\n`);
 });
