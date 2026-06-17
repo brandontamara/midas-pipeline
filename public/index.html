@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MiDAS AI Research Pipeline</title>
+<title>AI Research Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Barlow+Condensed:wght@400;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -84,7 +84,18 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
 .s-row.run .s-status{color:#3b82f6}
 .s-row.done .s-status{color:#27ae60}
 
-.terminal{background:#0d1117;padding:18px 20px;font-family:'Courier New',monospace;font-size:11px;line-height:1.8;color:#c9d1d9;min-height:380px;max-height:440px;overflow-y:auto}
+.terminal{
+  background:#0d1117;
+  color:#c9d1d9;
+
+  min-height:380px;
+  max-height:440px;
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+}
 .t-hdr{display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #21262d}
 .t-dot{width:10px;height:10px;border-radius:50%}
 .t-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:#484f58;letter-spacing:1px;margin-left:8px}
@@ -164,14 +175,38 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
 .btn-action-o{background:none;border:1.5px solid #dde3f0;color:#4a5568;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:9px 16px;border-radius:3px;cursor:pointer;transition:all .15s}
 .btn-action-o:hover{border-color:#06194a;color:#06194a}
 .powered-by{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;color:#8898bb;letter-spacing:1px}
+
+#intel-preview{
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;
+}
+
+#intel-img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,.08);
+  display:block;
+}
+
+#log-container{
+  flex:1;
+  overflow-y:auto;
+  padding:18px 20px;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  line-height:1.8;
+}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <div class="topbar">
-  <div class="m-logo">M</div>
-  <span class="topbar-name">MiDAS — Malaysian Institute of Defence and Security</span>
+  
+  <span class="topbar-name">AI Research & Intelligence Platform</span>
   <span class="topbar-pill">AI Research Pipeline · Live Demo</span>
 </div>
 
@@ -181,9 +216,9 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
   <div class="hero">
     <div class="hero-grid"></div>
     <div style="position:relative;z-index:1">
-      <div class="hero-kicker">MiDAS AI Research Pipeline · Live Interactive Demonstration</div>
+      <div class="hero-kicker">AI Research Pipeline · Live Interactive Demonstration</div>
       <h1 class="hero-h1">Research That Writes Itself.<br><em>Updates Itself. Proves Itself.</em></h1>
-      <p class="hero-body">Type any defence and security topic. The AI generates a real verified brief, all seven output formats, live — in front of you. Every output is unique, source-attributed, and institutional grade.</p>
+      <p class="hero-body">Type any research topic. The AI generates a verified analysis, executive summary, dashboard, and social-ready outputs in real time. Every output is unique, source-attributed, and publication-ready.</p>
 
       <div class="input-panel">
         <div class="input-lbl">Enter your research topic or policy question</div>
@@ -238,26 +273,40 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
       </div>
     </div>
     <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
-    <div class="run-body">
-      <div class="stages-panel" id="stages-panel"></div>
-      <div class="terminal">
-        <div class="t-hdr">
-          <div class="t-dot" style="background:#ff5f57"></div>
-          <div class="t-dot" style="background:#febc2e"></div>
-          <div class="t-dot" style="background:#28c840"></div>
-          <span class="t-label">MiDAS Pipeline · Process Log</span>
-        </div>
-        <div id="log-container"></div>
-      </div>
-    </div>
+<div class="run-body">
+
+  <div class="stages-panel" id="stages-panel"></div>
+
+<div class="terminal">
+
+  <div class="t-hdr">
+    <div class="t-dot" style="background:#ff5f57"></div>
+    <div class="t-dot" style="background:#febc2e"></div>
+    <div class="t-dot" style="background:#28c840"></div>
+    <span class="t-label">Research Pipeline · Process Log</span>
   </div>
-</div>
+
+  <div id="intel-preview">
+    <img
+      id="intel-img"
+      src="/assets/intel/evidence1.jpg">
+  </div>
+
+  <div id="log-container"></div>
+
+</div> <!-- terminal -->
+
+</div> <!-- run-body -->
+
+</div> <!-- run-card -->
+
+</div> <!-- s-running -->
 
 <!-- ═══════════ SCREEN 3: RESULTS ═══════════ -->
 <div id="s-results" class="screen">
   <div class="res-card">
     <div class="res-hdr">
-      <div class="res-kicker">MiDAS AI Research Pipeline · Output · All Content AI-Generated</div>
+      <div class="res-kicker">AI Research Pipeline · Output · All Content AI-Generated</div>
       <div class="res-title" id="res-title"></div>
       <div class="res-badges">
         <span class="rbadge gold">✓ AI Generated · Real Content</span>
@@ -275,6 +324,7 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
       <button class="tab-btn" onclick="showTab('dashboard',this)">Dashboard</button>
       <button class="tab-btn" onclick="showTab('social',this)">Social Brief</button>
       <button class="tab-btn" onclick="showTab('bm',this)">Bahasa Malaysia</button>
+      <button class="tab-btn" onclick="showTab('case',this)">Investigation Report</button>
     </div>
 
     <div id="pane-policy" class="tab-pane active"></div>
@@ -283,15 +333,16 @@ body{font-family:'Barlow',sans-serif;background:#eef0f6;color:#1a2540}
     <div id="pane-dashboard" class="tab-pane"></div>
     <div id="pane-social" class="tab-pane"></div>
     <div id="pane-bm" class="tab-pane"></div>
+    <div id="pane-case" class="tab-pane"></div>
 
     <div class="actions-bar">
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#8898bb;letter-spacing:2px;text-transform:uppercase">Export:</span>
-      <button class="btn-action" onclick="showToast('In live deployment: generates print-ready PDF in MiDAS house style with full citation trail')">↓ PDF</button>
+      <button class="btn-action" onclick="showToast('In live deployment: generates print-ready PDF in Institutional analysis style with full citation trail')">↓ PDF</button>
       <button class="btn-action" onclick="showToast('In live deployment: generates 12-slide branded PowerPoint automatically')">↓ PPTX</button>
       <button class="btn-action" onclick="citeCopy()">📋 Cite</button>
-      <button class="btn-action-o" onclick="showToast('156 subscribers alerted: MiDAS analysis updated — here is what changed.')">🔔 Alert Subscribers</button>
+      <button class="btn-action-o" onclick="showToast('156 subscribers alerted: Analysis updated — here is what changed.')">🔔 Alert Subscribers</button>
       <button class="btn-action-o" onclick="reset()">← New Topic</button>
-      <span class="powered-by">Powered by Mahat Advisory · mahatadvisory.com</span>
+      <span class="powered-by">Powered by AI Research Platform</span>
     </div>
   </div>
 </div>
@@ -333,19 +384,28 @@ function showToast(msg) {
 }
 
 function citeCopy() {
-  const doi = 'midas.mod.gov.my/research/PB-2026-' + Math.floor(Math.random() * 900 + 100);
+  const doi = 'research.local/report-' + Math.floor(Math.random() * 900 + 100);
   navigator.clipboard?.writeText(doi).catch(() => {});
   showToast('Citation link copied: ' + doi);
 }
 
 // ── LOG TERMINAL ─────────────────────────────────────
 function addLog(text, cls = '') {
+
   if (!logEl) return;
+
   const p = document.createElement('p');
+
   p.className = 'tl ' + cls;
+
   p.textContent = text;
+
   logEl.appendChild(p);
-  logEl.parentElement.scrollTop = logEl.parentElement.scrollHeight;
+
+  requestAnimationFrame(() => {
+    logEl.scrollTop = logEl.scrollHeight;
+  });
+
 }
 
 function setProg(pct) { if (progEl) progEl.style.width = pct + '%'; }
@@ -353,13 +413,15 @@ function setProg(pct) { if (progEl) progEl.style.width = pct + '%'; }
 // ── STAGE PANEL ──────────────────────────────────────
 function buildStages() {
   const STAGES = [
-    { n: '01', name: 'Data Ingestion', sub: 'SIPRI · IISS · Reuters · Bernama · Jane\'s' },
-    { n: '02', name: 'Verification Engine', sub: 'Cross-referencing · Confidence scores' },
-    { n: '03', name: 'Research Generation', sub: 'MiDAS house style · All formats' },
-    { n: '04', name: 'Multi-Format Output', sub: '6 simultaneous formats' },
-    { n: '05', name: 'Auto-Update Cascade', sub: 'Trigger indexing · Subscriber alerts' },
-    { n: '06', name: 'Stakeholder Interface', sub: 'Platform publication · DOI link' },
+    { n: '01', name: 'Accessing Internal Database', sub: 'Evidence photos · Reports · Intelligence files' },
+    { n: '02', name: 'Data Ingestion', sub: 'SIPRI · IISS · Reuters · Bernama · Jane\'s' },
+    { n: '03', name: 'Verification Engine', sub: 'Cross-referencing · Confidence scores' },
+    { n: '04', name: 'Research Generation', sub: 'Institutional analysis style · All formats' },
+    { n: '05', name: 'Multi-Format Output', sub: '6 simultaneous formats' },
+    { n: '06', name: 'Auto-Update Cascade', sub: 'Trigger indexing · Subscriber alerts' },
+    { n: '07', name: 'Stakeholder Interface', sub: 'Platform publication · DOI link' }
   ];
+
   document.getElementById('stages-panel').innerHTML = STAGES.map((s, i) => `
     <div class="s-row wait" id="sr${i}">
       <div class="s-dot">${s.n}</div>
@@ -368,7 +430,8 @@ function buildStages() {
         <div class="s-sub">${s.sub}</div>
         <div class="s-status" id="ss${i}">Waiting</div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
 function activateStage(i) {
@@ -381,6 +444,26 @@ function doneStage(i) {
   r.classList.remove('run'); r.classList.add('done');
   document.getElementById('ss' + i).textContent = 'Complete ✓';
 }
+
+const intelImages = [
+
+  "/assets/intel/evidence1.jpg",
+  "/assets/intel/evidence2.jpg",
+  "/assets/intel/evidence3.jpg",
+  "/assets/intel/evidence4.jpg",
+  "/assets/intel/evidence5.jpg",
+  "/assets/intel/evidence6.jpg",
+  "/assets/intel/evidence7.jpg",
+
+  "/assets/intel/documents1.jpg",
+  "/assets/intel/documents2.jpg",
+  "/assets/intel/documents3.jpg",
+  "/assets/intel/documents4.jpg",
+  "/assets/intel/documents5.jpg",
+  "/assets/intel/documents6.jpg",
+  "/assets/intel/documents7.jpg"
+
+];
 
 // ── MAIN PIPELINE ────────────────────────────────────
 async function startPipeline() {
@@ -405,10 +488,62 @@ async function startPipeline() {
   // Start API call immediately — runs in parallel with stage animations
   const apiPromise = fetchPipeline(topic);
 
+// Stage 00
+
+activateStage(0);
+statusEl.textContent = 'Stage 01 — Accessing Internal Database';
+
+const intelImg =
+  document.getElementById('intel-img');
+
+const stageLogs = [
+
+  ['[DB] Connecting to internal evidence repository...', 'm', null],
+  ['[DB] Access granted ✓', 'g', null],
+
+  ['[SCAN] Evidence Photo 1/7 analysed', 'g', 0],
+  ['[SCAN] Evidence Photo 2/7 analysed', 'g', 1],
+  ['[SCAN] Evidence Photo 3/7 analysed', 'g', 2],
+  ['[SCAN] Evidence Photo 4/7 analysed', 'g', 3],
+  ['[SCAN] Evidence Photo 5/7 analysed', 'g', 4],
+  ['[SCAN] Evidence Photo 6/7 analysed', 'g', 5],
+  ['[SCAN] Evidence Photo 7/7 analysed', 'g', 6],
+
+  ['[DOC] Intelligence Report 1/7 processed', 'g', 7],
+  ['[DOC] Intelligence Report 2/7 processed', 'g', 8],
+  ['[DOC] Intelligence Report 3/7 processed', 'g', 9],
+  ['[DOC] Intelligence Report 4/7 processed', 'g', 10],
+  ['[DOC] Intelligence Report 5/7 processed', 'g', 11],
+  ['[DOC] Intelligence Report 6/7 processed', 'g', 12],
+  ['[DOC] Intelligence Report 7/7 processed', 'g', 13],
+
+  ['[OCR] Extracting entities, metadata and timestamps...', 'm', null],
+  ['[SUCCESS] Internal database review complete · 14 assets processed', 'gold', null]
+
+];
+
+for (const [t, c, imgIndex] of stageLogs) {
+
+  addLog(t, c);
+
+  if (
+    imgIndex !== null &&
+    intelImg
+  ) {
+    intelImg.src =
+      intelImages[imgIndex];
+  }
+
+  await delay(170);
+}
+
+setProg(10);
+doneStage(0);
+
   // ── Stage 01 ──
-  activateStage(0); statusEl.textContent = 'Stage 01 — Data Ingestion';
+  activateStage(1); statusEl.textContent = 'Stage 02 — Data Ingestion';
   for (const [t, c] of [
-    ['[INIT] MiDAS Pipeline v2.1 activated — ' + new Date().toLocaleTimeString(), 'b'],
+    ['[INIT] Research Pipeline v2.1 activated — ' + new Date().toLocaleTimeString(), 'b'],
     ['[DATA] Connecting to source database network…', 'm'],
     ['[DATA] SIPRI Military Expenditure Database → connected (847 records)', 'g'],
     ['[DATA] IISS Military Balance 2025 → connected (12 ASEAN data tables)', 'g'],
@@ -421,10 +556,10 @@ async function startPipeline() {
     ['[SUCCESS] 12 databases connected · 179 raw items ingested', 'gold'],
     ['[CLASSIFY] Auto-tagging by topic, region, threat category…', 'm'],
   ]) { addLog(t, c); await delay(170); }
-  setProg(16); doneStage(0);
+  setProg(16); doneStage(1);
 
   // ── Stage 02 ──
-  activateStage(1); statusEl.textContent = 'Stage 02 — Verification Engine';
+  activateStage(2); statusEl.textContent = 'Stage 03 — Verification Engine';
   for (const [t, c] of [
     ['[VERIFY] Processing 179 claims across all ingested items…', 'm'],
     ['[VERIFY] Claim 1/179 — SIPRI spending figure — 3 sources agree ✓', 'g'],
@@ -435,11 +570,11 @@ async function startPipeline() {
     ['[VERIFY] 179/179 complete — confidence scores assigned: avg 91.4%', 'gold'],
     ['[SUCCESS] 4 contradictions flagged · 0 disqualified · source index built', 'gold'],
   ]) { addLog(t, c); await delay(210); }
-  setProg(33); doneStage(1);
+  setProg(33); doneStage(2);
 
   // ── Stage 03 — AI generation (awaits API) ──
-  activateStage(2); statusEl.textContent = 'Stage 03 — AI Research Generation';
-  addLog('[GEN] Research Generation Engine — drafting in MiDAS house style…', 'b');
+  activateStage(3); statusEl.textContent = 'Stage 04 — AI Research Generation';
+  addLog('[GEN] Research Generation Engine — drafting in Institutional analysis style…', 'b');
   addLog('[GEN] Generating policy brief · executive summary · key findings…', 'm');
   addLog('[GEN] Generating social posts · Bahasa Malaysia · dashboard data…', 'm');
   addLog('[GEN] Human review checkpoint flagged ← researcher to be assigned', 'gold');
@@ -459,10 +594,10 @@ async function startPipeline() {
     btn.disabled = false;
     return;
   }
-  setProg(50); doneStage(2);
+  setProg(50); doneStage(3);
 
   // ── Stage 04 ──
-  activateStage(3); statusEl.textContent = 'Stage 04 — Multi-Format Output';
+  activateStage(4); statusEl.textContent = 'Stage 05 — Multi-Format Output';
   for (const [t, c] of [
     ['[OUT] Format 1/6: Policy Brief (PDF-ready HTML)…', 'g'],
     ['[OUT] Format 2/6: Executive Summary (ministerial grade)…', 'g'],
@@ -472,22 +607,22 @@ async function startPipeline() {
     ['[OUT] Format 6/6: Bahasa Malaysia version…', 'g'],
     ['[SUCCESS] All 6 formats generated and validated ✓', 'gold'],
   ]) { addLog(t, c); await delay(155); }
-  setProg(67); doneStage(3);
+  setProg(67); doneStage(4);
 
   // ── Stage 05 ──
-  activateStage(4);
+  activateStage(5);
   for (const [t, c] of [
     ['[UPDATE] Indexing 47 auto-update trigger conditions…', 'm'],
     ['[UPDATE] Alert template prepared for 156 registered subscribers', 'g'],
     ['[SUCCESS] Auto-update cascade active — brief perpetually current', 'gold'],
   ]) { addLog(t, c); await delay(180); }
-  setProg(83); doneStage(4);
+  setProg(83); doneStage(5);
 
   // ── Stage 06 ──
-  activateStage(5);
-  const doi = 'midas.mod.gov.my/research/PB-2026-' + Math.floor(Math.random() * 900 + 100);
+  activateStage(6);
+  const doi = 'research.local/report-' + Math.floor(Math.random() * 900 + 100);
   for (const [t, c] of [
-    ['[PUB] Publishing to MiDAS platform…', 'm'],
+    ['[PUB] Publishing to research platform…', 'm'],
     ['[PUB] DOI link generated: ' + doi, 'g'],
     ['[PUB] Stakeholder access levels configured', 'g'],
     ['[PUB] 156 subscriber alerts queued', 'g'],
@@ -497,7 +632,7 @@ async function startPipeline() {
     ['  6 FORMATS · 179 CLAIMS VERIFIED · 91.4% CONFIDENCE', 'gold'],
     ['═══════════════════════════════════════════', 'd'],
   ]) { addLog(t, c); await delay(165); }
-  setProg(100); doneStage(5);
+  setProg(100); doneStage(6);
   statusEl.textContent = 'Pipeline complete!';
 
   await delay(800);
@@ -520,7 +655,7 @@ async function fetchPipeline(topic) {
 // ── RENDER RESULTS ────────────────────────────────────
 function renderResults(d, doi) {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-  document.getElementById('res-title').textContent = d.title || 'MiDAS Research Analysis';
+  document.getElementById('res-title').textContent = d.title || 'Research Analysis';
   document.getElementById('res-time').textContent = 'Generated in ' + elapsed + 's';
 
   // Policy Brief
@@ -531,7 +666,7 @@ function renderResults(d, doi) {
   // Executive Summary
   document.getElementById('pane-exec').innerHTML = `
     <div class="exec-box">
-      <div class="exec-kicker">Executive Summary · MiDAS Standard Format · Ministerial Grade</div>
+      <div class="exec-kicker">Executive Summary · Executive Format</div>
       <div class="exec-text">${d.exec_summary || ''}</div>
     </div>
     <div class="usage-box">
@@ -614,9 +749,100 @@ function renderResults(d, doi) {
     </div>
     <div class="bm-block"><div class="bm-lbl">Ringkasan Eksekutif</div><div class="bm-txt">${d.bm_exec || ''}</div></div>
     <div class="bm-block"><div class="bm-lbl">Analisis</div><div class="bm-txt">${d.bm_analysis || ''}</div></div>
-    <div class="bm-block"><div class="bm-lbl">Cadangan MiDAS</div><div class="bm-txt">${d.bm_rec || ''}</div></div>`;
+    <div class="bm-block"><div class="bm-lbl">Cadangan</div><div class="bm-txt">${d.bm_rec || ''}</div></div>`;
 
   showScreen('s-results');
+
+  // Investigation Report
+
+document.getElementById('pane-case').innerHTML = `
+<div class="out-text">
+
+<h3>I. Case Information</h3>
+
+<p>
+<strong>Case Number:</strong> ${d.case_number || 'CASE-' + Math.floor(Math.random()*100000)}<br>
+<strong>Date & Time of Report:</strong> ${new Date().toLocaleString()}<br>
+<strong>Investigating Officer:</strong> ${d.officer || 'Research Intelligence Officer'}<br>
+<strong>Date & Time of Incident:</strong> ${d.incident_time || 'Pending Verification'}<br>
+<strong>Location of Incident:</strong> ${d.location || 'Multiple-source intelligence review'}<br>
+<strong>Type of Incident:</strong> ${d.incident_type || d.title || 'Strategic Intelligence Assessment'}
+</p>
+
+<h3>II. Involved Parties</h3>
+
+<p>
+<strong>Reporting Party:</strong><br>
+Name: ${d.reporting_party || 'Automated Intelligence System'}<br><br>
+
+<strong>Victim(s):</strong><br>
+${d.victims || 'Not Applicable'}<br><br>
+
+<strong>Subject(s) / Suspect(s):</strong><br>
+${d.subjects || 'Under Assessment'}
+</p>
+
+<h3>III. Executive Summary</h3>
+
+<p>
+${d.exec_summary || ''}
+</p>
+
+<h3>IV. Chronological Narrative</h3>
+
+<p>
+${d.chronological_narrative || `
+[${new Date().toLocaleString()}] Research request received and case opened.<br><br>
+Source acquisition initiated across intelligence repositories.<br><br>
+Evidence collection completed and verification process executed.<br><br>
+AI-assisted analytical assessment generated and reviewed.<br><br>
+Final report prepared for stakeholder dissemination.
+`}
+</p>
+
+<h3>V. Evidence & Property Inventory</h3>
+
+<p>
+${d.evidence_inventory || `
+Item 1: Intelligence Report | Source: Internal Repository | Tag #: 001-A<br>
+Item 2: Open Source Media Data | Source: Public Collection | Tag #: 002-B<br>
+Item 3: Verification Records | Source: Cross-reference Engine | Tag #: 003-C<br>
+Item 4: Analytical Assessment | Source: AI Research Engine | Tag #: 004-D
+`}
+</p>
+
+<h3>VI. Interview Summaries</h3>
+
+<p>
+${d.interviews || `
+Witness 1: Open Source Reporting<br>
+Statement: Information collected from verified institutional publications and reporting channels.<br><br>
+
+Witness 2: Intelligence Repository<br>
+Statement: Historical records and supporting documentation reviewed and validated.
+`}
+</p>
+
+<h3>VII. Investigative Analysis</h3>
+
+<p>
+${d.investigative_analysis || d.bm_analysis || d.policy_html || ''}
+</p>
+
+<h3>VIII. Conclusions & Recommendations</h3>
+
+<p>
+<strong>Findings:</strong><br>
+${d.findings_summary || 'Available evidence supports the conclusions presented within this assessment.'}
+</p>
+
+<div class="rec-item">
+<strong>Recommendations:</strong><br>
+${d.bm_rec || 'Proceed with continued monitoring, stakeholder engagement, and further intelligence collection where required.'}
+</div>
+
+</div>
+`;
 }
 </script>
 </body>
